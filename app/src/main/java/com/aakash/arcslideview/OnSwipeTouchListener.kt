@@ -36,7 +36,6 @@ open class OnSwipeTouchListener(ctx: Context) : OnTouchListener {
             try {
                 val diffY = e2.y - e1.y
                 val diffX = e2.x - e1.x
-                println("diffY = $diffY , diffX = $diffX")
                 if (Math.abs(diffX) > Math.abs(diffY)) {
                     if (Math.abs(diffX) > SWIPE_THRESHOLD && Math.abs(velocityX) > SWIPE_VELOCITY_THRESHOLD) {
                         if (diffX > 0) {

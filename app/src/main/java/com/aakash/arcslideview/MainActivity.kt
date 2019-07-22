@@ -5,7 +5,6 @@ import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Handler
 import android.view.Display
-import android.view.MotionEvent
 import android.view.View
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlin.math.PI
@@ -18,16 +17,11 @@ class MainActivity : AppCompatActivity() {
     private var radius: Double = 0.0
 
     private var maxScreenWidth: Int = 0
-//    private var preX: Float = 0f
 
-    private var contentPreAngle: Double = 0.0
-    private var content2PreAngle: Double = 0.0
-//    var direction = -1
-//
-//    companion object {
-//        private const val DIR_LEFT = 0
-//        private const val DIR_RIGHT = 1
-//    }
+    private var imageArray: Array<View>? = null
+    private var imageBgArray: Array<View>? = null
+
+    private var currentIndex: Int = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -38,77 +32,55 @@ class MainActivity : AppCompatActivity() {
 
         maxScreenWidth = size.x
 
-        centerX = (maxScreenWidth / 2).minus(80).toFloat()
-        centerY = 0f
+        centerX = (maxScreenWidth / 2).toFloat()
+        centerY = -450f
 
-        radius = (maxScreenWidth / 2).toDouble()
+        radius = (maxScreenWidth / 2).plus(350).toDouble()
 
-//        rlParent.setOnTouchListener { v, event ->
-//            when (event.action) {
-//                MotionEvent.ACTION_DOWN -> {
-//                    preX = event.x
-//                    contentPreAngle = 180.0
-//                    content2PreAngle = 90.0
-//                    setupTextLocation()
-//                }
-//                MotionEvent.ACTION_MOVE -> {
-//                    println("event = ${event.x}")
-//                    if (event.x - preX >= (maxScreenWidth / 9)) {
-//                        preX = event.x
-//                        contentPreAngle -= 5
-//                        content2PreAngle -= 5
-//                        direction = DIR_RIGHT
-//                        setupTextLocation()
-//                    }
-////                    if (preX - event.x >= (maxScreenWidth / 9)) {
-////                        preX = event.x
-////                        contentPreAngle += 5
-////                        content2PreAngle += 5
-////                        direction = DIR_LEFT
-////                        setupTextLocation()
-////                    }
-//                }
-//                MotionEvent.ACTION_UP -> {
-//                    when (direction) {
-//                        DIR_RIGHT -> {
-//                            tvContent reverseSwipe Pair(contentPreAngle, 90.0)
-//                            tvContent2 reverseSwipe Pair(content2PreAngle, 0.0)
-//                        }
-////                        DIR_LEFT -> {
-////                            tvContent swipe Pair(contentPreAngle, 90.0)
-////                            tvContent2 swipe Pair(content2PreAngle, 180.0)
-////                        }
-//                    }
-//                }
-//            }
-//            true
-//        }
+        imageArray = Array(3) {
+            ivCenterImage
+        }
+        imageArray!![0] = ivStartImage
+        imageArray!![1] = ivCenterImage
+        imageArray!![2] = ivEndImage
 
-        rlParent.setOnTouchListener (object : OnSwipeTouchListener(this@MainActivity) {
+        imageBgArray = Array(3) {
+            ivBg1
+        }
+        imageBgArray!![0] = ivBg1
+        imageBgArray!![1] = ivBg2
+        imageBgArray!![2] = ivBg3
+
+        rlParent.setOnTouchListener(object : OnSwipeTouchListener(this@MainActivity) {
             override fun onSwipeRight() {
+
+                if (currentIndex == 2) {
+                    return
+                }
                 println("MainActivity.onSwipeRight")
-                tvContent reverseSwipe Pair(180.0, 90.0)
-                tvContent2 reverseSwipe Pair(90.0, 0.0)
+                imageArray!![currentIndex + 1] reverseSwipe Pair(180.0, 90.0)
+                imageArray!![currentIndex] reverseSwipe Pair(90.0, 0.0)
+
+                imageBgArray!![currentIndex + 1] bgReverseSwipe1 Pair(180.0, 90.0)
+                imageBgArray!![currentIndex] bgReverseSwipe2 Pair(90.0, 0.0)
+
+                currentIndex++
             }
 
             override fun onSwipeLeft() {
+                if (currentIndex == 0) {
+                    return
+                }
                 println("MainActivity.onSwipeLeft")
-                tvContent swipe Pair(90.0, 180.0)
-                tvContent2 swipe Pair(0.0, 90.0)
+                imageArray!![currentIndex] swipe Pair(90.0, 180.0)
+                imageArray!![currentIndex - 1] swipe Pair(0.0, 90.0)
+
+                imageBgArray!![currentIndex] bgSwipe1 Pair(90.0, 180.0)
+                imageBgArray!![currentIndex - 1] bgSwipe2 Pair(0.0, 90.0)
+                currentIndex--
             }
         })
 
-    }
-
-    private fun setupTextLocation() {
-        tvContent setLocation contentPreAngle
-        tvContent2 setLocation content2PreAngle
-    }
-
-    private infix fun View.setLocation(degree: Double) {
-        this.x = (centerX!! + (radius * Math.cos(degree * PI / 180))).toFloat()
-        this.y = (centerY!! + (radius * Math.sin(degree * PI / 180))).toFloat()
-        this.rotation = (degree + 270).toFloat()
     }
 
     private infix fun View.swipe(anglePair: Pair<Double, Double>) {
@@ -117,30 +89,104 @@ class MainActivity : AppCompatActivity() {
         var runnable: Runnable? = null
         runnable = Runnable {
             if (degree <= anglePair.second) {
-                this.x = (centerX!! + (radius * Math.cos(degree * PI / 180))).toFloat()
-                this.y = (centerY!! + (radius * Math.sin(degree * PI / 180))).toFloat()
+                this.x = (centerX!! + (radius * Math.cos(degree * PI / 180))).toFloat() - this.width / 2
+                this.y = (centerY!! + (radius * Math.sin(degree * PI / 180))).toFloat() - this.height / 2
                 this.rotation = (degree + 270).toFloat()
-                degree += 10
-                handler.postDelayed(runnable, 10)
+                degree += 5
+                handler.postDelayed(runnable, 30)
             }
         }
         handler.postDelayed(runnable, 100)
     }
 
     private infix fun View.reverseSwipe(anglePair: Pair<Double, Double>) {
+        if (this.visibility == View.GONE) {
+            this.visibility = View.VISIBLE
+        }
         var degree = anglePair.first
         val handler = Handler()
         var runnable: Runnable? = null
         runnable = Runnable {
             if (degree >= anglePair.second) {
-                this.x = (centerX!! + (radius * Math.cos(degree * PI / 180))).toFloat()
-                this.y = (centerY!! + (radius * Math.sin(degree * PI / 180))).toFloat()
+                this.x = (centerX!! + (radius * Math.cos(degree * PI / 180))).toFloat() - this.width / 2
+                this.y = (centerY!! + (radius * Math.sin(degree * PI / 180))).toFloat() - this.height / 2
                 this.rotation = (degree + 270).toFloat()
-                degree -= 10
-                handler.postDelayed(runnable, 10)
+                degree -= 5
+                handler.postDelayed(runnable, 30)
             }
         }
         handler.postDelayed(runnable, 100)
+    }
+
+    private infix fun View.bgSwipe2(anglePair: Pair<Double, Double>) {
+        var degree = anglePair.first
+        val handler = Handler()
+        var runnable: Runnable? = null
+        runnable = Runnable {
+            if (degree <= anglePair.second) {
+                this.x = (centerX!! + (radius * Math.cos(degree * PI / 180))).toFloat() - this.width / 2
+                this.y = (centerY!! + (radius * Math.sin(degree * PI / 180))).toFloat() - this.height / 2
+                this.rotation = (degree + 270).toFloat()
+                degree += 5
+                handler.postDelayed(runnable, 30)
+            }
+        }
+        handler.postDelayed(runnable, 1)
+    }
+
+    private infix fun View.bgSwipe1(anglePair: Pair<Double, Double>) {
+        var degree = anglePair.first
+        val handler = Handler()
+        var runnable: Runnable? = null
+        runnable = Runnable {
+            if (degree <= anglePair.second) {
+                this.x = (centerX!! + (radius * Math.cos(degree * PI / 180))).toFloat() - this.width / 2
+                this.y = (centerY!! + (radius * Math.sin(degree * PI / 180))).toFloat() - this.height / 2
+                this.rotation = (degree + 270).toFloat()
+                degree += 5
+                handler.postDelayed(runnable, 30)
+            }
+        }
+        handler.postDelayed(runnable, 201)
+    }
+
+
+    private infix fun View.bgReverseSwipe1(anglePair: Pair<Double, Double>) {
+        if (this.visibility == View.GONE) {
+            this.visibility = View.VISIBLE
+        }
+        var degree = anglePair.first
+        val handler = Handler()
+        var runnable: Runnable? = null
+        runnable = Runnable {
+            if (degree >= anglePair.second) {
+                this.x = (centerX!! + (radius * Math.cos(degree * PI / 180))).toFloat() - this.width / 2
+                this.y = (centerY!! + (radius * Math.sin(degree * PI / 180))).toFloat() - this.height / 2
+                this.rotation = (degree + 270).toFloat()
+                degree -= 5
+                handler.postDelayed(runnable, 30)
+            }
+        }
+        handler.postDelayed(runnable, 1)
+    }
+
+    private infix fun View.bgReverseSwipe2(anglePair: Pair<Double, Double>) {
+        if (this.visibility == View.GONE) {
+            this.visibility = View.VISIBLE
+        }
+        var degree = anglePair.first
+        val handler = Handler()
+        var runnable: Runnable? = null
+        runnable = Runnable {
+            if (degree >= anglePair.second) {
+                this.x = (centerX!! + (radius * Math.cos(degree * PI / 180))).toFloat() - this.width / 2
+                this.y = (centerY!! + (radius * Math.sin(degree * PI / 180))).toFloat() - this.height / 2
+                this.rotation = (degree + 270).toFloat()
+                degree -= 5
+                handler.postDelayed(runnable, 30)
+            }
+        }
+        handler.postDelayed(runnable, 201)
     }
 
 }
