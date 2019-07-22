@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.os.Handler
 import android.view.Display
 import android.view.View
+import android.widget.ImageView
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlin.math.PI
 
@@ -18,10 +19,12 @@ class MainActivity : AppCompatActivity() {
 
     private var maxScreenWidth: Int = 0
 
-    private var imageArray: Array<View>? = null
-    private var imageBgArray: Array<View>? = null
+    private var imageArray: Array<ImageView>? = null
+    private var imageBgArray: Array<ImageView>? = null
 
     private var currentIndex: Int = 0
+
+    private val imageLimit : Int = 5
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -37,24 +40,35 @@ class MainActivity : AppCompatActivity() {
 
         radius = (maxScreenWidth / 2).plus(350).toDouble()
 
-        imageArray = Array(3) {
-            ivCenterImage
+        imageArray = Array(imageLimit) {
+            ImageView(this)
         }
-        imageArray!![0] = ivStartImage
-        imageArray!![1] = ivCenterImage
-        imageArray!![2] = ivEndImage
+        imageBgArray = Array(imageLimit) {
+            ImageView(this)
+        }
 
-        imageBgArray = Array(3) {
-            ivBg1
+        for (i in 0 until imageLimit) {
+            imageArray!![i] = ImageView(this)
+            when (i % 3) {
+                0 -> imageArray!![i].setImageResource(R.drawable.sample_icon_1)
+                1 -> imageArray!![i].setImageResource(R.drawable.sample_icon_2)
+                2 -> imageArray!![i].setImageResource(R.drawable.sample_icon_3)
+            }
+            imageBgArray!![i].setImageResource(R.drawable.sample_background)
+            imageArray!![i].visibility = View.GONE
+
+            imageBgArray!![i].visibility = View.GONE
+            rlParent.addView(imageBgArray!![i])
+            rlParent.addView(imageArray!![i])
+
+            imageArray!![i].layoutParams.height = 400
+            imageArray!![i].layoutParams.width = 400
         }
-        imageBgArray!![0] = ivBg1
-        imageBgArray!![1] = ivBg2
-        imageBgArray!![2] = ivBg3
 
         rlParent.setOnTouchListener(object : OnSwipeTouchListener(this@MainActivity) {
             override fun onSwipeRight() {
 
-                if (currentIndex == 2) {
+                if (currentIndex == imageLimit - 1) {
                     return
                 }
                 println("MainActivity.onSwipeRight")
