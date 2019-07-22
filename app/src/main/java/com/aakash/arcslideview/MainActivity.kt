@@ -72,11 +72,11 @@ class MainActivity : AppCompatActivity() {
                     return
                 }
                 println("MainActivity.onSwipeRight")
-                imageArray!![currentIndex + 1] reverseSwipe Pair(180.0, 90.0)
-                imageArray!![currentIndex] reverseSwipe Pair(90.0, 0.0)
+                imageArray!![currentIndex + 1] reverseSwipe Triple(180.0, 90.0, 100)
+                imageArray!![currentIndex] reverseSwipe Triple(90.0, 0.0, 100)
 
-                imageBgArray!![currentIndex + 1] bgReverseSwipe1 Pair(180.0, 90.0)
-                imageBgArray!![currentIndex] bgReverseSwipe2 Pair(90.0, 0.0)
+                imageBgArray!![currentIndex + 1] reverseSwipe Triple(180.0, 90.0, 1)
+                imageBgArray!![currentIndex] reverseSwipe Triple(90.0, 0.0, 201)
 
                 currentIndex++
             }
@@ -86,23 +86,23 @@ class MainActivity : AppCompatActivity() {
                     return
                 }
                 println("MainActivity.onSwipeLeft")
-                imageArray!![currentIndex] swipe Pair(90.0, 180.0)
-                imageArray!![currentIndex - 1] swipe Pair(0.0, 90.0)
+                imageArray!![currentIndex] swipe Triple(90.0, 180.0, 100)
+                imageArray!![currentIndex - 1] swipe Triple(0.0, 90.0, 100)
 
-                imageBgArray!![currentIndex] bgSwipe1 Pair(90.0, 180.0)
-                imageBgArray!![currentIndex - 1] bgSwipe2 Pair(0.0, 90.0)
+                imageBgArray!![currentIndex] swipe Triple(90.0, 180.0, 201)
+                imageBgArray!![currentIndex - 1] swipe Triple(0.0, 90.0, 1)
                 currentIndex--
             }
         })
 
     }
 
-    private infix fun View.swipe(anglePair: Pair<Double, Double>) {
-        var degree = anglePair.first
+    private infix fun View.swipe(angleParam: Triple<Double, Double, Long>) {
+        var degree = angleParam.first
         val handler = Handler()
         var runnable: Runnable? = null
         runnable = Runnable {
-            if (degree <= anglePair.second) {
+            if (degree <= angleParam.second) {
                 this.x = (centerX!! + (radius * Math.cos(degree * PI / 180))).toFloat() - this.width / 2
                 this.y = (centerY!! + (radius * Math.sin(degree * PI / 180))).toFloat() - this.height / 2
                 this.rotation = (degree + 270).toFloat()
@@ -110,18 +110,18 @@ class MainActivity : AppCompatActivity() {
                 handler.postDelayed(runnable, 30)
             }
         }
-        handler.postDelayed(runnable, 100)
+        handler.postDelayed(runnable, angleParam.third)
     }
 
-    private infix fun View.reverseSwipe(anglePair: Pair<Double, Double>) {
+    private infix fun View.reverseSwipe(angleParam: Triple<Double, Double, Long>) {
         if (this.visibility == View.GONE) {
             this.visibility = View.VISIBLE
         }
-        var degree = anglePair.first
+        var degree = angleParam.first
         val handler = Handler()
         var runnable: Runnable? = null
         runnable = Runnable {
-            if (degree >= anglePair.second) {
+            if (degree >= angleParam.second) {
                 this.x = (centerX!! + (radius * Math.cos(degree * PI / 180))).toFloat() - this.width / 2
                 this.y = (centerY!! + (radius * Math.sin(degree * PI / 180))).toFloat() - this.height / 2
                 this.rotation = (degree + 270).toFloat()
@@ -129,78 +129,6 @@ class MainActivity : AppCompatActivity() {
                 handler.postDelayed(runnable, 30)
             }
         }
-        handler.postDelayed(runnable, 100)
+        handler.postDelayed(runnable, angleParam.third)
     }
-
-    private infix fun View.bgSwipe2(anglePair: Pair<Double, Double>) {
-        var degree = anglePair.first
-        val handler = Handler()
-        var runnable: Runnable? = null
-        runnable = Runnable {
-            if (degree <= anglePair.second) {
-                this.x = (centerX!! + (radius * Math.cos(degree * PI / 180))).toFloat() - this.width / 2
-                this.y = (centerY!! + (radius * Math.sin(degree * PI / 180))).toFloat() - this.height / 2
-                this.rotation = (degree + 270).toFloat()
-                degree += 5
-                handler.postDelayed(runnable, 30)
-            }
-        }
-        handler.postDelayed(runnable, 1)
-    }
-
-    private infix fun View.bgSwipe1(anglePair: Pair<Double, Double>) {
-        var degree = anglePair.first
-        val handler = Handler()
-        var runnable: Runnable? = null
-        runnable = Runnable {
-            if (degree <= anglePair.second) {
-                this.x = (centerX!! + (radius * Math.cos(degree * PI / 180))).toFloat() - this.width / 2
-                this.y = (centerY!! + (radius * Math.sin(degree * PI / 180))).toFloat() - this.height / 2
-                this.rotation = (degree + 270).toFloat()
-                degree += 5
-                handler.postDelayed(runnable, 30)
-            }
-        }
-        handler.postDelayed(runnable, 201)
-    }
-
-
-    private infix fun View.bgReverseSwipe1(anglePair: Pair<Double, Double>) {
-        if (this.visibility == View.GONE) {
-            this.visibility = View.VISIBLE
-        }
-        var degree = anglePair.first
-        val handler = Handler()
-        var runnable: Runnable? = null
-        runnable = Runnable {
-            if (degree >= anglePair.second) {
-                this.x = (centerX!! + (radius * Math.cos(degree * PI / 180))).toFloat() - this.width / 2
-                this.y = (centerY!! + (radius * Math.sin(degree * PI / 180))).toFloat() - this.height / 2
-                this.rotation = (degree + 270).toFloat()
-                degree -= 5
-                handler.postDelayed(runnable, 30)
-            }
-        }
-        handler.postDelayed(runnable, 1)
-    }
-
-    private infix fun View.bgReverseSwipe2(anglePair: Pair<Double, Double>) {
-        if (this.visibility == View.GONE) {
-            this.visibility = View.VISIBLE
-        }
-        var degree = anglePair.first
-        val handler = Handler()
-        var runnable: Runnable? = null
-        runnable = Runnable {
-            if (degree >= anglePair.second) {
-                this.x = (centerX!! + (radius * Math.cos(degree * PI / 180))).toFloat() - this.width / 2
-                this.y = (centerY!! + (radius * Math.sin(degree * PI / 180))).toFloat() - this.height / 2
-                this.rotation = (degree + 270).toFloat()
-                degree -= 5
-                handler.postDelayed(runnable, 30)
-            }
-        }
-        handler.postDelayed(runnable, 201)
-    }
-
 }
