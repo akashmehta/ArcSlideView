@@ -27,8 +27,26 @@ open class OnSwipeTouchListener(ctx: Context) : OnTouchListener {
 
     private inner class GestureListener : SimpleOnGestureListener() {
 
+        private var preX = 0f
         override fun onDown(e: MotionEvent): Boolean {
             return true
+        }
+
+        override fun onScroll(e1: MotionEvent?, e2: MotionEvent?, distanceX: Float, distanceY: Float): Boolean {
+            println("e1 = [${e1}], e2 = [${e2}], distanceX = [${distanceX}], distanceY = [${distanceY}]")
+            if (e2 != null) {
+                if (e2.x - preX >= 18) {
+                    preX = e2.x
+                    onSwipeLeftFraction()
+                }
+
+                if (preX - e2.x >= 18) {
+                    preX = e2.x
+                    onSwipeRightFraction()
+                }
+
+            }
+            return super.onScroll(e1, e2, distanceX, distanceY)
         }
 
         override fun onFling(e1: MotionEvent, e2: MotionEvent, velocityX: Float, velocityY: Float): Boolean {
@@ -65,6 +83,10 @@ open class OnSwipeTouchListener(ctx: Context) : OnTouchListener {
     open fun onSwipeRight() {}
 
     open fun onSwipeLeft() {}
+
+    open fun onSwipeLeftFraction() {}
+
+    open fun onSwipeRightFraction() {}
 
     fun onSwipeTop() {}
 

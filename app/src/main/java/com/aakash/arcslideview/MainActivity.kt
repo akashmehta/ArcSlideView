@@ -24,7 +24,9 @@ class MainActivity : AppCompatActivity() {
 
     private var currentIndex: Int = 0
 
-    private val imageLimit : Int = 5
+    private val imageLimit: Int = 2
+
+    private val angleThreshold = 5
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -66,17 +68,18 @@ class MainActivity : AppCompatActivity() {
         }
 
         rlParent.setOnTouchListener(object : OnSwipeTouchListener(this@MainActivity) {
+            private var isSwipeRight = false
             override fun onSwipeRight() {
 
                 if (currentIndex == imageLimit - 1) {
                     return
                 }
                 println("MainActivity.onSwipeRight")
-                imageArray!![currentIndex + 1] reverseSwipe Triple(180.0, 90.0, 100)
-                imageArray!![currentIndex] reverseSwipe Triple(90.0, 0.0, 100)
+                imageArray!![currentIndex + 1] reverseSwipe Triple(startAngle1, 90.0, 100)
+                imageArray!![currentIndex] reverseSwipe Triple(startAngle2, 0.0, 100)
 
-                imageBgArray!![currentIndex + 1] reverseSwipe Triple(180.0, 90.0, 1)
-                imageBgArray!![currentIndex] reverseSwipe Triple(90.0, 0.0, 201)
+                imageBgArray!![currentIndex + 1] reverseSwipe Triple(startAngle1, 90.0, 1)
+                imageBgArray!![currentIndex] reverseSwipe Triple(startAngle2, 0.0, 201)
 
                 currentIndex++
             }
@@ -86,12 +89,51 @@ class MainActivity : AppCompatActivity() {
                     return
                 }
                 println("MainActivity.onSwipeLeft")
-                imageArray!![currentIndex] swipe Triple(90.0, 180.0, 100)
-                imageArray!![currentIndex - 1] swipe Triple(0.0, 90.0, 100)
+                imageArray!![currentIndex] swipe Triple(startAngle1, 180.0, 100)
+                imageArray!![currentIndex - 1] swipe Triple(startAngle2, 90.0, 100)
 
-                imageBgArray!![currentIndex] swipe Triple(90.0, 180.0, 201)
-                imageBgArray!![currentIndex - 1] swipe Triple(0.0, 90.0, 1)
+                imageBgArray!![currentIndex] swipe Triple(startAngle1, 180.0, 201)
+                imageBgArray!![currentIndex - 1] swipe Triple(startAngle2, 90.0, 1)
                 currentIndex--
+            }
+
+            private var startAngle1 = 90.0
+            private var startAngle2 = 0.0
+            override fun onSwipeRightFraction() {
+                if (currentIndex == 0) {
+                    currentIndex = 1
+                }
+                isSwipeRight = true
+                val endAngle1: Double = startAngle1 + angleThreshold
+                val endAngle2: Double = startAngle2 + angleThreshold
+
+                imageArray!![currentIndex] swipe Triple(startAngle1, endAngle1, 100)
+                imageArray!![currentIndex - 1] swipe Triple(startAngle2, endAngle2, 100)
+
+                imageBgArray!![currentIndex] swipe Triple(startAngle1, endAngle1, 201)
+                imageBgArray!![currentIndex - 1] swipe Triple(startAngle2, endAngle2, 1)
+
+                startAngle1 = endAngle1
+                startAngle2 = endAngle2
+            }
+
+            override fun onSwipeLeftFraction() {
+                if (currentIndex == imageLimit - 1) {
+                    currentIndex = imageLimit - 2
+                }
+                isSwipeRight = false
+                val endAngle1: Double = startAngle1 - angleThreshold
+                val endAngle2: Double = startAngle2 - angleThreshold
+
+                println("MainActivity.onSwipeRight")
+                imageArray!![currentIndex + 1] reverseSwipe Triple(startAngle1, endAngle1, 100)
+                imageArray!![currentIndex] reverseSwipe Triple(startAngle2, endAngle2, 100)
+
+                imageBgArray!![currentIndex + 1] reverseSwipe Triple(startAngle1, endAngle1, 1)
+                imageBgArray!![currentIndex] reverseSwipe Triple(startAngle2, endAngle2, 201)
+
+                startAngle1 = endAngle1
+                startAngle2 = endAngle2
             }
         })
 
